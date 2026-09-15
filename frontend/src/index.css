@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+
+  --color-gold-50: #fbf7ec;
+  --color-gold-100: #f5ebcf;
+  --color-gold-200: #ead49a;
+  --color-gold-300: #deba63;
+  --color-gold-400: #d4a53c;
+  --color-gold-500: #b8862b;
+  --color-gold-600: #9a6b22;
+  --color-gold-700: #7b521f;
+  --color-gold-800: #664320;
+  --color-gold-900: #57391f;
+
+  --color-ink: #1c1917;
+  --color-cream: #faf7f2;
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-ink antialiased;
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-serif);
+  }
+  /* Tailwind v4 resets buttons to cursor: default — restore pointer on everything clickable */
+  button,
+  [role='button'],
+  [role='tab'],
+  [role='switch'],
+  a[href],
+  summary,
+  select,
+  label:has(input[type='checkbox'], input[type='radio']),
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='file'],
+  input[type='submit'],
+  input[type='button'] {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'],
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Custom utilities (Tailwind v4 requires @utility for classes that are composed with @apply) */
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-white hover:bg-gold-700;
+}
+@utility btn-gold {
+  @apply btn bg-gold-500 text-white hover:bg-gold-600;
+}
+@utility btn-outline {
+  @apply btn border border-ink/20 bg-white text-ink hover:border-ink;
+}
+@utility input {
+  @apply w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm outline-none transition placeholder:text-stone-400 focus:border-gold-500 focus:ring-2 focus:ring-gold-200;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-stone-700;
+}
+@utility card {
+  @apply rounded-2xl border border-stone-200 bg-white;
+}
+@utility chip {
+  @apply inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

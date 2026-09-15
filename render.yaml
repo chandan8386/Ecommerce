@@ -1,0 +1,64 @@
+# Render Blueprint — Aurum Jewelry API
+# Render dashboard → New → Blueprint → select this repo (branch: ecommerce).
+# Values marked `sync: false` are entered in the dashboard; they are never stored in git.
+services:
+  - type: web
+    name: aurum-jewelry-api
+    runtime: node
+    region: singapore
+    plan: free
+    branch: ecommerce
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.19.6
+      # ---- Required ----
+      - key: MONGO_URI
+        sync: false # mongodb+srv://… from MongoDB Atlas
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: API_URL
+        sync: false # https://aurum-jewelry-api.onrender.com
+      - key: CLIENT_URLS
+        sync: false # https://<storefront>.vercel.app,https://<admin>.vercel.app
+      - key: STORE_URL
+        sync: false # https://<storefront>.vercel.app
+      - key: RAZORPAY_KEY_ID
+        sync: false # rzp_test_… or rzp_live_… (required in production)
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      # ---- Strongly recommended (Render's disk is wiped on every deploy) ----
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: aurum-jewelry
+      # ---- Seed admin (used only if you run `npm run seed` from the Render shell) ----
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      # ---- Commerce ----
+      - key: CURRENCY
+        value: INR
+      - key: TAX_RATE
+        value: "3"
+      - key: SHIPPING_FEE
+        value: "99"
+      - key: FREE_SHIPPING_THRESHOLD
+        value: "999"
+      - key: PENDING_ORDER_TTL_MINUTES
+        value: "30"

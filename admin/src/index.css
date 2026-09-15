@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-brand-50: #fbf7ec;
+  --color-brand-100: #f5ebcf;
+  --color-brand-200: #ead49a;
+  --color-brand-400: #d4a53c;
+  --color-brand-500: #b8862b;
+  --color-brand-600: #9a6b22;
+  --color-brand-700: #7b521f;
+}
+
+@layer base {
+  body { @apply bg-slate-50 text-slate-800 antialiased; }
+  /* Tailwind v4 resets buttons to cursor: default — restore pointer on everything clickable */
+  button,
+  [role='button'],
+  [role='tab'],
+  [role='switch'],
+  a[href],
+  summary,
+  select,
+  label:has(input[type='checkbox'], input[type='radio']),
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='file'],
+  input[type='date'],
+  input[type='submit'],
+  input[type='button'] {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'],
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Custom utilities (Tailwind v4 requires @utility for classes that are composed with @apply) */
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
+@utility btn-primary { @apply btn bg-slate-900 text-white hover:bg-slate-700; }
+@utility btn-brand { @apply btn bg-brand-500 text-white hover:bg-brand-600; }
+@utility btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50; }
+@utility btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
+@utility btn-ghost { @apply btn px-2 text-slate-600 hover:bg-slate-100; }
+@utility input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100; }
+@utility label { @apply mb-1 block text-sm font-medium text-slate-700; }
+@utility panel { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+@utility badge { @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium; }
+
+@layer components {
+  .table { @apply w-full text-left text-sm; }
+  .table th { @apply whitespace-nowrap border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .table td { @apply border-b border-slate-100 px-4 py-3 align-middle; }
+  .table tbody tr:hover { @apply bg-slate-50/60; }
+}
