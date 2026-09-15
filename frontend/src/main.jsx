@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import { WishlistProvider } from './context/WishlistContext.jsx';
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <App />
+              <ErrorBoundary>
+                <App />
+              </ErrorBoundary>
               <Toaster position="top-center" toastOptions={{ style: { borderRadius: '999px', fontSize: '14px' } }} />
             </WishlistProvider>
           </CartProvider>

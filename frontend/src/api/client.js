@@ -19,7 +19,16 @@ export const setUnauthorizedHandler = (fn) => {
 };
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // A static host can answer /api/* with an HTML page. Treat that as a failure, never as data.
+    if (typeof res.data !== 'object' || res.data === null) {
+      const err = new Error('Unexpected response from the API server');
+      err.response = res;
+      err.config = res.config;
+      return Promise.reject(err);
+    }
+    return res;
+  },
   (error) => {
     if (error.response?.status === 401 && localStorage.getItem(TOKEN_KEY)) {
       onUnauthorized();
