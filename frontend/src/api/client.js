@@ -30,6 +30,11 @@ api.interceptors.response.use(
 
 /** Extracts a human readable message from an axios error. */
 export const errorMessage = (err, fallback = 'Something went wrong') => {
+  // A non-JSON reply (e.g. Vercel's HTML page or a 405) means the request never reached the API server.
+  if (err?.response && (typeof err.response.data !== 'object' || err.response.data === null)) {
+    return 'Our store is temporarily unavailable. Please try again shortly.';
+  }
+  if (err && !err.response && err.request) return 'Network error: unable to reach the server. Please check your connection.';
   const data = err?.response?.data;
   if (data?.details?.length && data.message === 'Validation failed') {
     return data.details.map((d) => d.message).join(', ');

@@ -32,6 +32,11 @@ api.interceptors.response.use(
 );
 
 export const errorMessage = (err, fallback = 'Something went wrong') => {
+  // A non-JSON reply (e.g. Vercel's HTML page or a 405) means the request never reached the API server.
+  if (err?.response && (typeof err.response.data !== 'object' || err.response.data === null)) {
+    return 'Cannot reach the API server. The admin is not connected to the backend yet (check VITE_API_URL).';
+  }
+  if (err && !err.response && err.request) return 'Network error: unable to reach the API server. Please try again.';
   const data = err?.response?.data;
   if (data?.details?.length) return `${data.message}: ${data.details.map((d) => `${d.field ? `${d.field} – ` : ''}${d.message}`).join('; ')}`;
   return data?.message || err?.message || fallback;
