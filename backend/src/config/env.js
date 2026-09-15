@@ -1,9 +1,12 @@
+import crypto from 'node:crypto';
+
 const toNumber = (value, fallback) => {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 };
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+// Render sets RENDER=true; treat it as production even if NODE_ENV was forgotten.
+const nodeEnv = process.env.NODE_ENV || (process.env.RENDER ? 'production' : 'development');
 
 export const env = {
   nodeEnv,
@@ -48,21 +51,37 @@ env.cloudinary.enabled = Boolean(
 );
 env.razorpay.enabled = Boolean(env.razorpay.keyId && env.razorpay.keySecret);
 // Mock gateway lets the full checkout flow run locally without Razorpay keys.
-env.razorpay.mock = !env.razorpay.enabled && !env.isProd;
+env.razorpay.mock = !env.razorpay.enabled && !env.isProd && !process.env.RENDER;
 
+/** Configuration problems, reported (by name only, never values) at GET /api/health. */
+export const configStatus = { errors: [], warnings: [] };
+
+/**
+ * Validates configuration without ever exiting the process, so a misconfigured deploy still
+ * answers /api/health with a precise explanation instead of crash-looping silently.
+ */
 export function assertEnv() {
-  const problems = [];
+  const { errors, warnings } = configStatus;
+
   if (!env.jwtSecret || env.jwtSecret.length < 32) {
-    if (env.isProd) problems.push('JWT_SECRET must be set and at least 32 characters');
-    else {
+    if (env.isProd) {
+      env.jwtSecret = crypto.randomBytes(48).toString('hex');
+      warnings.push('JWT_SECRET is not set (or shorter than 32 characters): using a random secret, so users are signed out on every restart');
+    } else {
       env.jwtSecret = 'dev-only-insecure-jwt-secret-please-change-me-0123456789';
-      console.warn('[env] JWT_SECRET missing/short - using an insecure development secret');
+      warnings.push('JWT_SECRET missing/short: using an insecure development secret');
     }
   }
+  if (env.isProd && !process.env.MONGO_URI) {
+    errors.push('MONGO_URI is not set: add your MongoDB Atlas connection string');
+  }
   if (env.isProd && !env.razorpay.enabled) {
-    problems.push('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are required in production');
+    warnings.push('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set: online payments are disabled (Cash on Delivery still works)');
   }
-  if (problems.length) {
-    throw new Error(`Invalid environment configuration:\n - ${problems.join('\n - ')}`);
+  if (env.isProd && env.clientUrls.every((u) => /localhost|127\.0\.0\.1/.test(u))) {
+    warnings.push('CLIENT_URLS only allows localhost: browsers on your live sites will be blocked by CORS');
   }
+
+  for (const e of errors) console.error(`[env] ERROR: ${e}`);
+  for (const w of warnings) console.warn(`[env] WARNING: ${w}`);
 }

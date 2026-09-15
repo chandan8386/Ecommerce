@@ -31,7 +31,14 @@ export default function Checkout() {
       setAddressId(r.data.find((a) => a.isDefault)?._id || r.data[0]?._id || '');
       if (!r.data.length) setAdding(true);
     });
-    paymentApi.config().then((r) => setPaymentConfig(r.data)).catch(() => {});
+    paymentApi
+      .config()
+      .then((r) => {
+        setPaymentConfig(r.data);
+        // Online payment is unavailable when the store has no Razorpay keys (and isn't in dev mock mode).
+        if (!r.data.keyId && !r.data.mock) setPaymentMethod('cod');
+      })
+      .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!placing && !loading && cart.items.length === 0) return <Navigate to="/cart" replace />;
@@ -78,6 +85,7 @@ export default function Checkout() {
   };
 
   const hasIssues = cart.issues?.length > 0;
+  const onlineAvailable = !paymentConfig || paymentConfig.mock || Boolean(paymentConfig.keyId);
 
   return (
     <div className="container-page py-10">
@@ -114,11 +122,14 @@ export default function Checkout() {
           <section className="card p-6">
             <h2 className="text-2xl font-semibold">2. Payment method</h2>
             <div className="mt-5 space-y-3">
-              <label className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 ${paymentMethod === 'razorpay' ? 'border-gold-500 bg-gold-50/50' : 'border-stone-200'}`}>
-                <input type="radio" name="pm" className="mt-1 accent-gold-600" checked={paymentMethod === 'razorpay'} onChange={() => setPaymentMethod('razorpay')} />
+              <label className={`flex items-start gap-3 rounded-xl border-2 p-4 ${onlineAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'} ${paymentMethod === 'razorpay' ? 'border-gold-500 bg-gold-50/50' : 'border-stone-200'}`}>
+                <input type="radio" name="pm" className="mt-1 accent-gold-600" disabled={!onlineAvailable} checked={paymentMethod === 'razorpay'} onChange={() => setPaymentMethod('razorpay')} />
                 <div>
                   <p className="font-medium">Pay online <span className="text-xs text-stone-500">(UPI, cards, net banking, wallets)</span></p>
-                  <p className="text-sm text-stone-500">Secured by Razorpay{paymentConfig?.mock && <span className="ml-1 rounded bg-amber-100 px-1.5 text-xs text-amber-800">demo mode</span>}</p>
+                  <p className="text-sm text-stone-500">
+                    {onlineAvailable ? 'Secured by Razorpay' : 'Currently unavailable — please choose Cash on Delivery'}
+                    {paymentConfig?.mock && <span className="ml-1 rounded bg-amber-100 px-1.5 text-xs text-amber-800">demo mode</span>}
+                  </p>
                 </div>
               </label>
               <label className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 ${paymentMethod === 'cod' ? 'border-gold-500 bg-gold-50/50' : 'border-stone-200'}`}>
