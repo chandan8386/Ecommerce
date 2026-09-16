@@ -32,7 +32,7 @@ services:
       - key: STORE_URL
         sync: false # https://<storefront>.vercel.app
       - key: RAZORPAY_KEY_ID
-        sync: false # rzp_test_… or rzp_live_… (required in production)
+        sync: false # rzp_test_… or rzp_live_…; without keys checkout offers Cash on Delivery only
       - key: RAZORPAY_KEY_SECRET
         sync: false
       - key: RAZORPAY_WEBHOOK_SECRET

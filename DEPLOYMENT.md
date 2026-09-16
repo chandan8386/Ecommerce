@@ -60,15 +60,18 @@ gh repo create aurum-jewelry-ecommerce --private --source . --remote origin --pu
 | `API_URL` | `https://aurum-jewelry-api.onrender.com` (your service URL) |
 | `CLIENT_URLS` | `https://<storefront>.vercel.app,https://<admin>.vercel.app`. Use `http://localhost:4400,http://localhost:4401` until Vercel is deployed, then update |
 | `STORE_URL` | `https://<storefront>.vercel.app` |
-| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | **Required.** The API refuses to start in production without them. `rzp_test_…` keys work |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | Recommended. Without them the API still runs, but online payment is disabled and checkout offers only Cash on Delivery. `rzp_test_…` keys work |
 | `RAZORPAY_WEBHOOK_SECRET` | Secret you choose when creating the webhook (step 6) |
 | `CLOUDINARY_*` | Strongly recommended. Without them, uploaded images are lost on every redeploy |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Admin account created by the seed |
 
 `JWT_SECRET` is generated automatically.
 
-3. Deploy, then open `https://<service>.onrender.com/api/health`. It should show `"db":"connected"`.
-4. **Load demo data (optional, only once).** Render service → **Shell** → run `npm run seed`. ⚠ This erases the database and recreates the demo data.
+3. Deploy, then open `https://<service>.onrender.com/api/health`.
+   - **200 `"status":"ok"`**: ready.
+   - **503 `"status":"degraded"`**: the response names the problem. `configErrors` / `configWarnings` list missing settings (names only, never values), and `dbError` shows why MongoDB is unreachable, with the password masked. Fix the setting in **Environment**, then **Manual Deploy → Deploy latest commit**.
+4. **Demo data loads automatically** the first time the API connects to an *empty* database (products, categories, coupons and the `SEED_ADMIN_EMAIL` admin account). Set `AUTO_SEED=false` to disable this. To reset the demo data later, run `npm run seed` in the Render **Shell**. ⚠ That erases the database.
+5. **Change the demo admin password** after first sign-in if the site is public.
 
 > The free plan sleeps after 15 minutes of inactivity, and the first request afterwards takes about 30–50 seconds. Upgrade the plan for production traffic.
 
@@ -123,7 +126,9 @@ Razorpay Dashboard → **Settings → Webhooks → Add**:
 
 | Symptom | Fix |
 |---|---|
-| Render deploy fails: *RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are required in production* | Add the Razorpay keys |
+| `/api/health` returns 503 `"degraded"` | Read `configErrors`, `configWarnings` and `dbError` in the response and fix the named setting |
+| Requests to the service hang with no response | The service isn't running: check Render → Logs. Make sure **Root Directory** is `backend` (the repository root also works now) and the build finished |
+| Checkout only offers Cash on Delivery | Razorpay keys aren't set. Add `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` and redeploy |
 | Browser error *blocked by CORS* | `CLIENT_URLS` must exactly match the Vercel URLs (https, no trailing slash) |
 | `MongoServerSelectionError` | Atlas Network Access must allow `0.0.0.0/0`; check the user and password in `MONGO_URI` |
 | Storefront calls `/api` on vercel.app and gets 404 | `VITE_API_URL` wasn't set before the build. Set it and redeploy |
