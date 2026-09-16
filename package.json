@@ -11,7 +11,8 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:admin": "npm run dev --prefix admin",
     "dev": "concurrently -n api,shop,admin -c yellow,cyan,magenta \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:admin\"",
-    "build": "npm run build --prefix frontend && npm run build --prefix admin",
+    "build": "npm ci --prefix backend --omit=dev",
+    "build:web": "npm run build --prefix frontend && npm run build --prefix admin",
     "start": "npm start --prefix backend"
   },
   "devDependencies": {

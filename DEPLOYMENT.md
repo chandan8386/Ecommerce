@@ -51,7 +51,10 @@ gh repo create aurum-jewelry-ecommerce --private --source . --remote origin --pu
 
 ## 3. Backend on Render
 
-1. https://dashboard.render.com → **New → Blueprint** → connect GitHub → pick `aurum-jewelry-ecommerce`. Render reads `render.yaml`.
+1. https://dashboard.render.com → **New → Blueprint** → connect GitHub → pick the repository. Render reads `render.yaml`.
+
+> **Root Directory.** The recommended setup is Root Directory `backend`, build `npm ci --omit=dev`, start `npm start`.
+> A service created at the **repository root** also works: the root `build` script installs the backend's dependencies and the root `start` script launches the API. Building the storefront/admin from the root is intentionally *not* part of `build` (Vercel builds those); use `npm run build:web` locally for that.
 2. Fill in the prompted environment variables:
 
 | Variable | Value |
